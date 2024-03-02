@@ -16,7 +16,7 @@ class Vehicle {
     }
   
     // Method to calculate remaining range based on current charge and battery capacity
-    getRange(): number {
+    async getRange(): Promise<number> {
       // Assuming an average consumption. You may adjust the formula based on real-world data or specific models
       const averageWhPerMile = 250; // Example value: 250 Wh per mile
       const remainingKWh = this.batteryCapacity * (this.currentCharge / 100);
@@ -25,7 +25,7 @@ class Vehicle {
     }
   
     // Method to update current charge, e.g., after charging
-    updateCharge(newCharge: number): void {
+    async updateCharge(newCharge: number): Promise<void> {
         try {
           if (newCharge < 0 || newCharge > 100) {
             throw new Error("Charge must be between 0 and 100 percent.");
@@ -36,9 +36,25 @@ class Vehicle {
             
         }
       }
-    }
+    
 
-    //vehicle saving method
-        //saves all the information of the vehicle/user to the database to
+  async saveVehicle(): Promise<void> {
+    try {
+      const vehicleRef = db.collection('vehicles').doc(this.carUser);
+      await vehicleRef.set({
+        // Vehicle data to be saved onto our database
+        vehicleId: this.carUser,
+        make: this.make,
+        model: this.model,
+        currentCharge: this.currentCharge,
+        batteryCapacity: this.batteryCapacity
+      });
+      console.log('Vehicle saved successfully');
+    } catch (error) {
+      console.error('Error saving vehicle:', error);
+      throw error;
+    }
+    }
+}
   
   
