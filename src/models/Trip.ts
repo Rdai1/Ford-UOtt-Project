@@ -3,7 +3,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-const apikey = process.env.FIREBASE_PROJECT_ID
+const apikey = process.env.GEO_KEY
 console.log('API Key:', apikey);
 
 class Trip {
