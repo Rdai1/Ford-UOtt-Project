@@ -16,16 +16,16 @@ export default function TabOneScreen() {
       <Text style={styles.title}>Login Page</Text>
 
       <SafeAreaView>
-      <TextInput
-        style={styles.input}
-        placeholder = "Username"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        keyboardType="numeric"
-      />
-    </SafeAreaView>
+        <TextInput
+          style={styles.input}
+          placeholder = "Username"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          keyboardType="numeric"
+        />
+      </SafeAreaView>
 
       <View style={styles.password} />
       <View style={styles.username} />
