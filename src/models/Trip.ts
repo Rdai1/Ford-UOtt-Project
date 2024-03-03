@@ -78,6 +78,3 @@ class Trip {
     }
 
 }
-
-let trip = new Trip("1125 Colonel By Dr, Ottawa, ON K1S 5B6","75 Laurier Ave E, Ottawa, ON K1N 6N5");
-console.log(trip.calculateRoute());
