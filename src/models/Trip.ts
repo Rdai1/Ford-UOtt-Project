@@ -1,10 +1,34 @@
 // start location and end location
 // plan route 
-import dotenv from 'dotenv';
-dotenv.config();
+interface GeoapifyResponse {
+    features: {
+      properties: {
+        lat: number;
+        lon: number;
+      };
+    }[];
+}
 
-const apikey = process.env.GEO_KEY
-console.log('API Key:', apikey);
+interface Route {
+    features: {
+        properties: {
+            units: string;
+            distance: number;
+            time: number;
+            legs: {
+                distance: number;
+                time: number;
+                steps: {
+                    // Adjust the types as needed based on the actual structure of your steps
+                    instruction: {
+                        text: string;
+                    };
+                    // Add other properties if present in the actual data
+                }[];
+            }[];
+        }
+    }[];
+}
 
 class Trip {
     startLocation: string;
@@ -15,43 +39,42 @@ class Trip {
         this.endLocation = end;
     }
 
-    public async calculateRoute(){
-        //some code here
-
-        var requestOptions = {
-            method: 'GET',
-          };
-          
-        var startInfo = await fetch(`https://api.geoapify.com/v1/geocode/search?text=${this.startLocation}&apiKey=${process.env.GEO_KEY}`, requestOptions)
-            .then(response => response.json())
-            .then(result => console.log(result))
-            .catch(error => console.log('error', error));
-        var endInfo = await fetch(`https://api.geoapify.com/v1/geocode/search?text=${this.endLocation}&apiKey=${process.env.GEO_KEY}`, requestOptions)
-            .then(response => response.json())
-            .then(result => console.log(result))
-            .catch(error => console.log('error', error));
-
-        var requestOptions2 = {
-                method: 'GET',
-              };
-        return fetch(`https://api.geoapify.com/v1/routing?waypoints=${startInfo.results[0].lat}${startInfo.results[0].lon}|${endInfo.results[0].lat}${endInfo.results[0].lon}&mode=drive&apiKey=06750946a4dd424faf90dc6bc8507718`, requestOptions2)
-            .then(response => response.json())
-            .then(result => console.log(result))
-            .catch(error => console.log('error', error));
-
+    async getCord(location: string) {
+        const response =  await fetch(`https://api.geoapify.com/v1/geocode/search?text=${location}&apiKey=06750946a4dd424faf90dc6bc8507718`, requestOptions)
+        
+        const result = await response.json();
+    
+        return result;
     }
     
-    public getChargingStations(){
-        //TODO::
+    async calculateRoute(startLocationIn: string, endLocationIn: string){
+    
+        const startLocation = await this.getCord(startLocationIn) as GeoapifyResponse;
+        const endLocation = await this.getCord(endLocationIn) as GeoapifyResponse;
+    
+        console.log("start location: " + startLocation.features[0].properties.lat);
+    
+        const response = await fetch(`https://api.geoapify.com/v1/routing?waypoints=${startLocation.features[0].properties.lat},${startLocation.features[0].properties.lon}|${endLocation.features[0].properties.lat},${endLocation.features[0].properties.lon}&mode=drive&apiKey=06750946a4dd424faf90dc6bc8507718`, requestOptions);
+    
+        const route = await response.json() as Route;
+    
+        console.log(route.features[0].properties.legs[0].steps.forEach(step => {
+            console.log(step.instruction.text);
+        }));
+        return route;
+        
+    }
+    
+    async getChargingStations(startLocationLat: string, startLocationLon: string, endLocationLat: string, endLocationLon: string){
         var requestOptions = {
             method: 'GET',
         };
 
-        return fetch(`https://api.geoapify.com/v2/places?categories=service.vehicle.charging_station&filter=rect:${startInfo.results[0].lat}${startInfo.results[0].lon}|${endInfo.results[0].lat}${endInfo.results[0].lon}&limit=5&apiKey=YOUR_API_KEY
-        `, requestOptions)
-        .then(response => response.json())
-        .then(result => console.log(result))
-        .catch(error => console.log('error', error));
+        const response = fetch(`https://api.geoapify.com/v2/places?categories=service.vehicle.charging_station&filter=rect:${startLocationLat},${startLocationLon}|${endLocationLat},${endLocationLon}&limit=5&apiKey=06750946a4dd424faf90dc6bc8507718`, requestOptions);
+
+        const stations = (await response).json();
+
+        return stations;
     }
 
 }
